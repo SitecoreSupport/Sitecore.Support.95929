@@ -5,7 +5,7 @@
       Text="Select or search for the image or media file that you want to open.">
 
       <Stylesheet Src="MediaBrowser.css" DeviceDependant="true" />
-      <CodeBeside Type="Sitecore.Shell.Applications.Media.MediaBrowser.MediaBrowserForm,Sitecore.Client"/>
+      <CodeBeside Type="Sitecore.Support.Shell.Applications.Media.MediaBrowser.MediaBrowserForm,Sitecore.Support.95929"/>
 
       <DataContext ID="MediaDataContext" DataViewName="Master"/>
 

@@ -1,4 +1,4 @@
-﻿namespace Sitecore.Shell.Applications.Media.MediaBrowser
+﻿namespace Sitecore.Support.Shell.Applications.Media.MediaBrowser
 {
   using Sitecore;
   using Sitecore.Configuration;
@@ -150,7 +150,13 @@
         Item root = this.MediaDataContext.GetRoot();
         if ((root != null) && (root.ID != root.Database.GetRootItem().ID))
         {
+          string str2 = str;
           str = FileUtil.MakePath(root.Paths.Path, str, '/');
+          string str3 = root.Paths.Path.Replace("/sitecore/media library", "");
+          if (str2.Contains(str3))
+          {
+            str = FileUtil.MakePath(root.Paths.Path, str2.Replace(str3, ""), '/');
+          }
         }
         Item item = this.MediaDataContext.GetItem(str);
         if (item == null)
@@ -172,11 +178,10 @@
     protected void OpenWebDAVBrowser(ClientPipelineArgs args)
     {
       Assert.ArgumentNotNull(args, "args");
-      string path = args.Parameters["id"];
-      string name = args.Parameters["language"];
-      string str3 = args.Parameters["version"];
-      string str4 = args.Parameters["database"];
-      Database database = Factory.GetDatabase(str4);
+      string path = args.Parameters.Get("id");
+      string name = args.Parameters.Get("language");
+      string str3 = args.Parameters.Get("version");
+      Database database = Factory.GetDatabase(args.Parameters.Get("database"));
       Assert.IsNotNull(database, "database");
       Item item = database.GetItem(path, Language.Parse(name), Sitecore.Data.Version.Parse(str3));
       if (item == null)
@@ -193,16 +198,10 @@
         else
         {
           ID id = WebDAVConfiguration.SaveOptions(webDAVOptions);
-          UrlString str5 = new UrlString(Context.Site.XmlControlPage);
-          str5["xmlcontrol"] = "Sitecore.Shell.Applications.WebDAV.WebDAVBrowser";
-          str5["oid"] = id.ToString();
-          ModalDialogOptions options = new ModalDialogOptions(str5.ToString())
-          {
-            Width = "624",
-            Height = "600",
-            Response = true
-          };
-          SheerResponse.ShowModalDialog(options);
+          UrlString str4 = new UrlString(Context.Site.XmlControlPage);
+          str4["xmlcontrol"] = "Sitecore.Shell.Applications.WebDAV.WebDAVBrowser";
+          str4["oid"] = id.ToString();
+          SheerResponse.ShowModalDialog(str4.ToString(), true);
           args.WaitForPostBack();
         }
       }
@@ -229,10 +228,10 @@
         {
           selectionItem = WebDAVUtil.GetBrowseRootItem(selectionItem);
           NameValueCollection parameters = new NameValueCollection();
-          parameters["id"] = selectionItem.ID.ToString();
-          parameters["language"] = selectionItem.Language.ToString();
-          parameters["version"] = selectionItem.Version.ToString();
-          parameters["database"] = selectionItem.Database.Name;
+          parameters.Set("id", selectionItem.ID.ToString());
+          parameters.Set("language", selectionItem.Language.ToString());
+          parameters.Set("version", selectionItem.Version.ToString());
+          parameters.Set("database", selectionItem.Database.Name);
           Context.ClientPage.Start(this, "OpenWebDAVBrowser", parameters);
         }
       }
@@ -274,7 +273,7 @@
       }
       output.Write("</div>");
       output.Write("<div class=\"scTileHeader\">");
-      output.Write(item.GetUIDisplayName());
+      output.Write(item.DisplayName);
       output.Write("</div>");
       output.Write("</a>");
     }
@@ -298,7 +297,7 @@
       output.Write("<img src=\"" + mediaUrl + "\" class=\"scPreviewImage\" border=\"0\" alt=\"\" />");
       output.Write("</div>");
       output.Write("<div class=\"scPreviewHeader\">");
-      output.Write(item.GetUIDisplayName());
+      output.Write(item.DisplayName);
       output.Write("</div>");
       output.Write("</td></tr></table>");
     }
@@ -392,7 +391,7 @@
       }
       else
       {
-        Context.ClientPage.SendMessage(this, "media:upload(edit=1,load=1,tofolder=1)");
+        Context.ClientPage.SendMessage(this, "media:upload(edit=1,load=1,tofolder=1," + Sitecore.Configuration.State.Client.UsesBrowserWindowsQueryParameterName + "=1)");
       }
     }
   }
