@@ -153,7 +153,7 @@
           string str2 = str;
           str = FileUtil.MakePath(root.Paths.Path, str, '/');
           string str3 = root.Paths.Path.Replace("/sitecore/media library", "");
-          if (str2.Contains(str3))
+          if (str2.Contains(str3) && !string.IsNullOrEmpty(str3))
           {
             str = FileUtil.MakePath(root.Paths.Path, str2.Replace(str3, ""), '/');
           }
